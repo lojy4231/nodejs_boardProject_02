@@ -36,6 +36,13 @@ router.post("/signup", async (req, res) => {
             return
         }
 
+        if (nickname === password){
+            res.status(400).send({
+                errorMessage: " 닉네임과 비밀번호는 같을 수 없습니다.",
+            });
+            return
+        };
+
         const user = new User({ nickname, password });
         await user.save();
 
