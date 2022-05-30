@@ -88,10 +88,12 @@ router.post("/signin", async (req, res) => {
     }
 });
 
-router.get("/users/me", authMiddleware, async (req, res) => {
+router.get("/signin/me", authMiddleware, async (req, res) => {
     const { user } = res.locals;
-    res.status(400).send({
-        user,
+    res.send({
+        user: {
+            nickname: user.nickname
+        },
     });
 });
 
