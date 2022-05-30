@@ -3,6 +3,8 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+
 const User = require("../models/user");
 const authMiddleware = require("../middlewares/auth-middleware");
 
@@ -15,7 +17,7 @@ const userSchema = Joi.object({
 
 
 // 회원가입
-router.post("/users", async (req, res) => {
+router.post("/signup", async (req, res) => {
     try {
         const { nickname, password, confiemPassword } = await userSchema.validateAsync(req.body);
 
@@ -50,20 +52,21 @@ router.post("/users", async (req, res) => {
 // 로그인
 
 const authSchema = Joi.object({
-    email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
+    nickname: Joi.string().alphanum().min(3).max(30).required(),
     password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{4,30}$')).required(),
 });
-router.post("/auth", async (req, res) => {
+router.post("/signin", async (req, res) => {
     try {
-        const { email, password } = await authSchema.validateAsync(req.body);
+        const { nickname, password } = await authSchema.validateAsync(req.body);
+        
+        const user = await User.findOne({ nickname }).exec();
+        const isSamePassword = await bcrypt.compare(password, user.password);
 
-        const user = await User.findOne({ email, password }).exec();
-
-        if (!user) {
-            res.status(400).send({
-                errorMessage: " 이메일 또는 비밀번호가 잘못됐습니다."
-            });
-            return;
+        if (!isSamePassword) {
+                res.status(400).send({
+                    errorMessage: " 닉네임 또는 비밀번호가 잘못됐습니다."
+                });
+                return;
         }
 
         const token = jwt.sign({ userId: user.userId }, process.env.JWT_SECRET_KEY);
