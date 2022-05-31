@@ -32,39 +32,6 @@ router.get("/post/:postNum", async (req, res) => {
 
 });
 
-// 게시글 삭제
-router.delete("/post/:postNum", authMiddleware, async (req, res) => {
-    const { userId } = res.locals.user;
-    const { postNum } = req.params;
-
-    const deletePost = await Post.findOne({ userId, postNum: Number(postNum) }).exec();
-    if (deletePost) {
-        deletePost.delete();
-    } else {
-        res.status(400).send({
-            errorMassege: "내가 쓴 글만 삭제 가능 합니다."
-        });
-    }
-    res.json({ success: true });
-});
-
-// 게시글 수정
-router.put("/post/:postNum", authMiddleware, async (req, res) => {
-    const { userId } = res.locals.user;
-    const { postNum } = req.params;
-    const { title, content } = req.body;
-
-    const existPost = await Post.findOne({ userId, postNum: Number(postNum) }).exec();
-    if (existPost) {
-        await Post.updateOne({ postNum: Number(postNum) }, { $set: { title, content } });
-    } else {
-        res.status(400).send({
-            errorMassege: "내가 쓴 글만 수정 가능 합니다."
-        });
-    }
-    res.json({ success: true });
-});
-
 // 게시글 작성
 router.post("/post", authMiddleware, async (req, res) => {
     const { userId } = res.locals.user;
@@ -81,6 +48,39 @@ router.post("/post", authMiddleware, async (req, res) => {
     await post.save();
 
     res.send({ post });
+});
+
+// 게시글 수정
+router.put("/post/:postNum", authMiddleware, async (req, res) => {
+    const { userId } = res.locals.user;
+    const { postNum } = req.params;
+    const { title, content } = req.body;
+
+    const existPost = await Post.findOne({ postNum: Number(postNum) }).exec();
+    if (userId === existPost.userId) {
+        await Post.updateOne({ postNum: Number(postNum) }, { $set: { title, content } });
+    } else {
+        res.status(400).send({
+            errorMassege: "내가 쓴 글만 수정 가능 합니다."
+        });
+    }
+    res.json({ success: true });
+});
+
+// 게시글 삭제
+router.delete("/post/:postNum", authMiddleware, async (req, res) => {
+    const { userId } = res.locals.user;
+    const { postNum } = req.params;
+
+    const deletePost = await Post.findOne({ postNum: Number(postNum) }).exec();
+    if (userId === deletePost.userId) {
+        deletePost.delete();
+    } else {
+        res.status(400).send({
+            errorMassege: "내가 쓴 글만 삭제 가능 합니다."
+        });
+    }
+    res.json({ success: true });
 });
 
 module.exports = router;
