@@ -12,65 +12,75 @@ router.get("/", (req, res) => {
 router.get("/post", async (req, res) => {
     const { date } = req.query;
 
-    const posts = await Post.find({ date }).sort({ date: -1 }).exec();
+    const posts = await Post.find({ }).sort({ date: -1 }).exec();
 
     res.json({
         posts,
     });
 });
 
-
 // 게시글 상세 조회
-router.get("/post/:postId", async (req, res) => {
-    const { postId } = req.params;
+router.get("/post/:postNum", async (req, res) => {
+    const { postNum } = req.params;
 
-    const post = await Post.findById(postId).exec();
-    if (!post){
+    const post = await Post.find({ postNum: Number(postNum) }).exec();
+    if (!post) {
         res.status(400).send({});
-    } else{
-        res.send({ post });
+    } else {
+        res.json({ post });
     }
-    
+
 });
-
-
-// 게시글 삭제
-router.delete("/post/:postId", authMiddleware, async (req, res) => {
-    const { userId } = res.locals.user;
-    const { postId } = req.params;
-
-    const deletePost = await Post.findOne({ userId, postId }).exec();
-    if (deletePost) {
-        deletePost.delete();
-    }
-    res.json({ success: true });
-});
-
-// 게시글 수정
-router.put("/post/:postId", authMiddleware, async (req, res) => {
-    const { userId } = res.locals.user;
-    const { postId } = req.params;
-    const { title } = req.body;
-    const { content } = req.body;
-
-    const existPost = await Post.findOne({ userId, postId }).exec();
-    if (existPost) {
-        await existPost.updateOne( {}, { $set: { title, content } });
-    }
-    res.send({ existPost });
-});
-
 
 // 게시글 작성
 router.post("/post", authMiddleware, async (req, res) => {
     const { userId } = res.locals.user;
     const { title, date, content } = req.body;
+    
+    const maxPostNum = await Post.findOne().sort("-postNum").exec();
+    let postNum = 10001;
 
+    if (maxPostNum) {
+        postNum = maxPostNum.postNum +1;
+    }
 
-    const post = new Post({ userId, title, date, content });
+    const post = new Post({ postNum, userId, title, date, content });
     await post.save();
 
     res.send({ post });
+});
+
+// 게시글 수정
+router.put("/post/:postNum", authMiddleware, async (req, res) => {
+    const { userId } = res.locals.user;
+    const { postNum } = req.params;
+    const { title, content } = req.body;
+
+    const existPost = await Post.findOne({ postNum: Number(postNum) }).exec();
+    if (userId === existPost.userId) {
+        await Post.updateOne({ postNum: Number(postNum) }, { $set: { title, content } });
+    } else {
+        res.status(400).send({
+            errorMassege: "내가 쓴 글만 수정 가능 합니다."
+        });
+    }
+    res.json({ success: true });
+});
+
+// 게시글 삭제
+router.delete("/post/:postNum", authMiddleware, async (req, res) => {
+    const { userId } = res.locals.user;
+    const { postNum } = req.params;
+
+    const deletePost = await Post.findOne({ postNum: Number(postNum) }).exec();
+    if (userId === deletePost.userId) {
+        deletePost.delete();
+    } else {
+        res.status(400).send({
+            errorMassege: "내가 쓴 글만 삭제 가능 합니다."
+        });
+    }
+    res.json({ success: true });
 });
 
 module.exports = router;

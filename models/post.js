@@ -1,7 +1,12 @@
 const mongoose = require("mongoose");
 
 const postSchema = new mongoose.Schema({
-    userId: String,    
+    userId: String,
+    postNum: {
+        type: Number,
+        required: true,
+        unique: true,
+    }, 
     title: {
         type: String,
         required: true,
@@ -14,9 +19,6 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-});
-postSchema.virtual("postId").get(function () {
-    return this._id.toHexString();
 });
 postSchema.set("toJSON", {
     virtuals: true,
