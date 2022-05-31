@@ -1,5 +1,6 @@
-const { number } = require("joi");
 const mongoose = require("mongoose");
+let moment = require('moment-timezone');
+moment.tz.setDefault("Asia/Seoul");
 
 const commentSchema = new mongoose.Schema({
     userId: String,
@@ -11,7 +12,7 @@ const commentSchema = new mongoose.Schema({
     },
     date: {
         type: Date,
-        default: Date.now
+        default: moment().format("YYYY-MM-DD hh:mm:ss")
     },
 });
 commentSchema.virtual("commentId").get(function () {
