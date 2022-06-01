@@ -55,6 +55,7 @@ router.put("/comment/:commentNum", authMiddleware, async (req, res) => {
         res.status(400).send({
             errorMassege: "내가 작성한 댓글만 수정 가능합니다."
         });
+        return;
     }
 });
 
@@ -71,6 +72,7 @@ router.delete("/comment/:commentNum", authMiddleware, async (req, res) => {
         res.status(400).send({
             errorMassege: "내가 작성한 댓글만 삭제 가능합니다."
         });
+        return;
     }
 });
 

@@ -55,7 +55,7 @@ router.put("/post/:postNum", authMiddleware, async (req, res) => {
     const { userId } = res.locals.user;
     const { postNum } = req.params;
     const { title, content } = req.body;
-
+    
     const existPost = await Post.findOne({ postNum: Number(postNum) }).exec();
     if (userId === existPost.userId) {
         await Post.updateOne({ postNum: Number(postNum) }, { $set: { title, content } });
@@ -63,6 +63,7 @@ router.put("/post/:postNum", authMiddleware, async (req, res) => {
         res.status(400).send({
             errorMassege: "내가 쓴 글만 수정 가능 합니다."
         });
+        return;
     }
     res.json({ success: true });
 });
@@ -79,6 +80,7 @@ router.delete("/post/:postNum", authMiddleware, async (req, res) => {
         res.status(400).send({
             errorMassege: "내가 쓴 글만 삭제 가능 합니다."
         });
+        return;
     }
     res.json({ success: true });
 });
