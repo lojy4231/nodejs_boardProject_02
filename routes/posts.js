@@ -12,7 +12,7 @@ router.get("/", (req, res) => {
 router.get("/post", async (req, res) => {
     const { date } = req.query;
 
-    const posts = await Post.find({ }).sort({ date: -1 }).exec();
+    const posts = await Post.find({}).sort({ date: -1 }).exec();
 
     res.json({
         posts,
@@ -36,12 +36,12 @@ router.get("/post/:postNum", async (req, res) => {
 router.post("/post", authMiddleware, async (req, res) => {
     const { userId } = res.locals.user;
     const { title, date, content } = req.body;
-    
+
     const maxPostNum = await Post.findOne().sort("-postNum").exec();
     let postNum = 10001;
 
     if (maxPostNum) {
-        postNum = maxPostNum.postNum +1;
+        postNum = maxPostNum.postNum + 1;
     }
 
     const post = new Post({ postNum, userId, title, date, content });

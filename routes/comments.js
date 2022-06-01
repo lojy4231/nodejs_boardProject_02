@@ -1,9 +1,7 @@
 const express = require("express");
-const Post = require("../models/post");
 const Comment = require("../models/comment");
 const router = express.Router();
 const authMiddleware = require("../middlewares/auth-middleware");
-const user = require("../models/user");
 
 
 //댓글 조회
@@ -43,31 +41,11 @@ router.post("/post/:postNum/comment/", authMiddleware, async (req, res) => {
     }
 });
 
-// 댓글 조회
-// router.get("/comment/:commentNum", authMiddleware, async (req, res) => {
-//     const { commentNum } = req.params;
-//     const { userId } = res.locals.user; //현재 로그인한 유저아이디
-//     console.log(userId);
-    
-
-//     const comment = await Comment.findOne({ commentNum: Number(commentNum) }).exec();
-//     console.log(comment.userId);
-//     if(!comment){
-//         res.status(400).send({});
-//     }else{
-//         res.json({
-//             comment,
-//         });
-//     }
-// });
-
-
 // 댓글 수정
 router.put("/comment/:commentNum", authMiddleware, async (req, res) => {
     const { userId } = res.locals.user;
     const { commentNum } = req.params;
     const { comment } = req.body;
-    
 
     const existPost = await Comment.findOne({ commentNum: Number(commentNum) }).exec();
     if (userId === existPost.userId) {
@@ -78,15 +56,13 @@ router.put("/comment/:commentNum", authMiddleware, async (req, res) => {
             errorMassege: "내가 작성한 댓글만 수정 가능합니다."
         });
     }
-
-    
 });
 
 // 댓글 삭제
 router.delete("/comment/:commentNum", authMiddleware, async (req, res) => {
     const { userId } = res.locals.user;
     const { commentNum } = req.params;
-    
+
     const existPost = await Comment.findOne({ commentNum: Number(commentNum) }).exec();
     if (userId === existPost.userId) {
         existPost.delete();
@@ -95,8 +71,7 @@ router.delete("/comment/:commentNum", authMiddleware, async (req, res) => {
         res.status(400).send({
             errorMassege: "내가 작성한 댓글만 삭제 가능합니다."
         });
-    }    
+    }
 });
-
 
 module.exports = router;
