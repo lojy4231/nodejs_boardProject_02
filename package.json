@@ -17,5 +17,9 @@
     "moment": "^2.29.3",
     "moment-timezone": "^0.5.34",
     "mongoose": "^6.3.4"
+  },
+  "devDependencies": {
+    "swagger-jsdoc": "^6.2.1",
+    "swagger-ui-express": "^4.4.0"
   }
 }
