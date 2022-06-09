@@ -1,15 +1,16 @@
-const express = require('express');
-const connect = require('./models'); // mongDB 연결
+const express = require("express");
+const connect = require("./models"); // mongDB 연결
 
-const authRouter = require('./routes/auth');
-const postRouter = require('./routes/posts');
-const commentRouter = require('./routes/comments');
+const authRouter = require("./routes/auth");
+const postRouter = require("./routes/posts");
+const commentRouter = require("./routes/comments");
+const { swaggerUi, specs } = require("./swagger/swagger");
 const app = express();
 const port = 3000;
 
 const requestMiddleware = (req, res, next) => {
-    console.log('Request URL:', req.originalUrl, '-', new Date());
-    next();
+  console.log("Request URL:", req.originalUrl, "-", new Date());
+  next();
 };
 
 connect();
@@ -17,8 +18,10 @@ connect();
 app.use(express.json());
 app.use(requestMiddleware);
 
- app.use('/api', [authRouter, postRouter, commentRouter]);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+
+app.use("/api", [authRouter, postRouter, commentRouter]);
 
 app.listen(port, () => {
-    console.log(port, "포트로 서버가 켜졌어요")
+  console.log(port, "포트로 서버가 켜졌어요");
 });
